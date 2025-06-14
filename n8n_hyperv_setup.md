@@ -1,6 +1,6 @@
 # Cài đặt Máy chủ Ảo Ubuntu chạy n8n và SSH từ máy chính
 
-## ✅ 1. Tạo máy ảo Ubuntu trên Hyper-V
+## 1. Tạo máy ảo Ubuntu trên Hyper-V
 
 ### Bước 1: Tải ISO Ubuntu
 - Truy cập: [https://ubuntu.com/download/server](https://ubuntu.com/download/server)
@@ -24,7 +24,7 @@
 
 ---
 
-## ✅ 2. Cấu hình IP tĩnh
+## 2. Cấu hình IP tĩnh
 
 ```bash
 sudo nano /etc/netplan/00-installer-config.yaml
@@ -50,7 +50,7 @@ sudo netplan apply
 
 ---
 
-## ✅ 3. SSH từ máy chính vào máy ảo
+## 3. SSH từ máy chính vào máy ảo
 
 ```bash
 ssh caothedo@192.168.1.100
@@ -58,7 +58,7 @@ ssh caothedo@192.168.1.100
 
 ---
 
-## ✅ 4. Cài đặt n8n bằng Docker
+## 4. Cài đặt n8n bằng Docker
 
 ```bash
 sudo apt update
@@ -114,7 +114,7 @@ docker compose up -d
 
 ---
 
-## ✅ 5. Trỏ domain `n8n.caothedo.com`
+## 5. Trỏ domain `n8n.caothedo.com`
 
 ### Nếu dùng nội mạng:
 Sửa file `hosts` trên máy chính:
@@ -128,7 +128,7 @@ Tạo bản ghi `A` trỏ `n8n` → IP public máy chủ
 
 ---
 
-## ✅ 6. Cài NGINX + SSL
+## 6. Cài NGINX + SSL
 
 ```bash
 sudo apt install nginx
@@ -166,13 +166,13 @@ sudo certbot --nginx -d n8n.caothedo.com
 
 ---
 
-## ✅ 7. Truy cập thử
+## 7. Truy cập thử
 
 Mở trình duyệt: https://n8n.caothedo.com
 
 ---
 
-## ✅ Gợi ý kiểm tra lỗi
+## Gợi ý kiểm tra lỗi
 
 - `docker ps`: Kiểm tra container đang chạy
 - `sudo systemctl status nginx`: Trạng thái NGINX
