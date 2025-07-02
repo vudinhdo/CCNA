@@ -21,7 +21,7 @@ Báo cáo này trình bày quy trình thiết lập hệ thống CI/CD (Continuo
 ### 4.1. Thiết lập dự án
 - **Tạo dự án trên GitLab Server**:
   - Tạo dự án `shoes` trên GitLab Server tại `http://caothedo.gitlab.com` với mức độ truy cập Private.
-  - URL repository: `http://caothedo.gitlab.com/your-group/shoes.git`.
+  - URL repository: `http://caothedo.gitlab.com/test/shoes.git`.
 - **Tạo ứng dụng Node.js mẫu**:
   - Khởi tạo dự án Node.js cục bộ:
     ```bash
@@ -66,7 +66,7 @@ Báo cáo này trình bày quy trình thiết lập hệ thống CI/CD (Continuo
     git init
     git add .
     git commit -m "Initial commit for shoes project"
-    git remote add origin http://caothedo.gitlab.com/your-group/shoes.git
+    git remote add origin http://caothedo.gitlab.com/test/shoes.git
     git push -u origin master
     ```
 
