@@ -79,33 +79,44 @@ nano .env
 **File `.env`:**
 
 ```env
+# Cấu hình cơ bản
+N8N_HOST=your-domain
+N8N_PORT=5678
+N8N_PROTOCOL=https
+N8N_EDITOR_BASE_URL=https://your-domain.com
+
+# Xác thực cơ bản (tùy chọn, nếu muốn bật)
 N8N_BASIC_AUTH_ACTIVE=true
-N8N_BASIC_AUTH_USER=admin
+N8N_BASIC_AUTH_USER=your_username
 N8N_BASIC_AUTH_PASSWORD=your_password
-WEBHOOK_URL=https://n8n.caothedo.com
-TZ=Asia/Ho_Chi_Minh
+N8N_HOST=192.168.1.100
+N8N_SECURE_COOKIE=false
+
+# Cấu hình email (tùy chọn, cho thông báo hoặc khôi phục)
+N8N_EMAIL_MODE=smtp
+N8N_SMTP_HOST=smtp.gmail.com
+N8N_SMTP_PORT=587
+N8N_SMTP_USER=your_email@gmail.com
+N8N_SMTP_PASS=your_app_password
+N8N_SMTP_SENDER=your_email@gmail.com
+
+# Giới hạn tài nguyên (tùy chọn)
+N8N_CONCURRENCY=10
 ```
 
 **File `docker-compose.yml`:**
 
 ```yaml
-version: "3.7"
-
 services:
   n8n:
-    image: n8nio/n8n
+    image: n8nio/n8n:latest
     ports:
       - "5678:5678"
-    environment:
-      - N8N_BASIC_AUTH_ACTIVE
-      - N8N_BASIC_AUTH_USER
-      - N8N_BASIC_AUTH_PASSWORD
-      - WEBHOOK_URL
-      - TZ
+    volumes:
+      - ./n8n-data:/home/node/.n8n
+    restart: always
     env_file:
       - .env
-    volumes:
-      - ./n8n_data:/home/node/.n8n
 ```
 
 ```bash
