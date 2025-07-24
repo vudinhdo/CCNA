@@ -105,6 +105,7 @@ N8N_CONCURRENCY=10
 ```
 
 **File `docker-compose.yml`:**
+```sudo nano docker-compose.yml```
 
 ```yaml
 services:
