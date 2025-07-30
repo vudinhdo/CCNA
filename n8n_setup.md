@@ -83,7 +83,10 @@ N8N_BASIC_AUTH_PASSWORD=your_password
 WEBHOOK_URL=https://n8n.caothedo.com
 TZ=Asia/Ho_Chi_Minh
 ```
-
+### Cấu hình file yml  
+```bash
+nano docker-compose.yml
+```
 **File `docker-compose.yml`:**
 
 ```yaml
