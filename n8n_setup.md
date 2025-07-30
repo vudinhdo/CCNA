@@ -57,17 +57,6 @@ Kiểm tra phiên bản Docker Compose:
 docker-compose --version
 ```
 
-Nếu lệnh trên vẫn báo lỗi, kiểm tra file `docker-compose`:
-```bash
-file /usr/local/bin/docker-compose
-```
-File nên hiển thị là một executable. Nếu file rỗng hoặc lỗi, xóa và tải lại:
-```bash
-sudo rm /usr/local/bin/docker-compose
-sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-```
-
 ### Tạo thư mục và file Cấu hình
 ```bash
 mkdir n8n && cd n8n
@@ -122,6 +111,7 @@ docker compose up -d
 Sửa file `hosts` trên máy chính:
 
 ```txt
+C:\Windows\System32\drivers\etc  
 192.168.1.100   n8n.caothedo.com
 ```
 
