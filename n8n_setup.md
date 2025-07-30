@@ -3,21 +3,25 @@
 ## 1. Tạo máy ảo Ubuntu trên Hyper-V
 
 ### Bước 1: Tải ISO Ubuntu
-- Truy cập: [https://ubuntu.com/download/server](https://ubuntu.com/download/server)
+
+- Truy cập: https://ubuntu.com/download/server
 - Tải bản Ubuntu Server (VD: 22.04 LTS)
 
 ### Bước 2: Tạo External Switch
+
 - Mở **Hyper-V Manager** → `Virtual Switch Manager`
 - Tạo **External Switch** kết nối với card mạng thật
 - Đặt tên ví dụ: `ExternalNetwork`
 
 ### Bước 3: Tạo máy ảo mới
+
 - RAM: 2–4 GB
 - CPU: 2 core
 - HDD: 20–30 GB
 - Mạng: dùng External Switch đã tạo
 
 ### Bước 4: Cài đặt Ubuntu Server
+
 - Hostname: `n8n-server`
 - Chọn `OpenSSH Server`
 - Thiết lập user (VD: `caothedo`)
@@ -60,65 +64,107 @@ ssh caothedo@192.168.1.100
 
 ## 4. Cài đặt n8n bằng Docker
 
+### Cài đặt Docker
+
+Cập nhật hệ thống và cài các gói hỗ trợ:
+
 ```bash
 sudo apt update
-sudo apt install -y curl gnupg2 ca-certificates apt-transport-https software-properties-common
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
+sudo apt install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
+```
+
+Thêm khóa GPG chính thức của Docker:
+
+```bash
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+```
+
+Thêm repository Docker:
+
+```bash
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+
+Cập nhật lại danh sách gói và cài đặt Docker:
+
+```bash
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io
+```
+
+Kiểm tra phiên bản Docker:
+
+```bash
+sudo docker --version
+```
+
+Cho phép người dùng hiện tại chạy Docker mà không cần `sudo`:
+
+```bash
 sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-### Tạo thư mục và file cấu hình
+### Cài đặt Docker Compose
+
+Tải phiên bản mới nhất của Docker Compose (thay `<version>` bằng phiên bản mới nhất, ví dụ: `2.24.5`):
+
+```bash
+sudo curl -L "https://github.com/docker/compose/releases/download/v<version>/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+```
+
+Cấp quyền thực thi:
+
+```bash
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+Kiểm tra phiên bản Docker Compose:
+
+```bash
+docker-compose --version
+```
+
+### Tạo thư mục và file Cấu hình
 
 ```bash
 mkdir n8n && cd n8n
 nano .env
 ```
 
-**File `.env`:**
+**File** `.env`**:**
 
 ```env
-# Cấu hình cơ bản
-N8N_HOST=your-domain
-N8N_PORT=5678
-N8N_PROTOCOL=https
-N8N_EDITOR_BASE_URL=https://your-domain.com
-
-# Xác thực cơ bản (tùy chọn, nếu muốn bật)
 N8N_BASIC_AUTH_ACTIVE=true
-N8N_BASIC_AUTH_USER=your_username
+N8N_BASIC_AUTH_USER=admin
 N8N_BASIC_AUTH_PASSWORD=your_password
-N8N_HOST=192.168.1.100
-N8N_SECURE_COOKIE=false
-
-# Cấu hình email (tùy chọn, cho thông báo hoặc khôi phục)
-N8N_EMAIL_MODE=smtp
-N8N_SMTP_HOST=smtp.gmail.com
-N8N_SMTP_PORT=587
-N8N_SMTP_USER=your_email@gmail.com
-N8N_SMTP_PASS=your_app_password
-N8N_SMTP_SENDER=your_email@gmail.com
-
-# Giới hạn tài nguyên (tùy chọn)
-N8N_CONCURRENCY=10
+WEBHOOK_URL=https://n8n.caothedo.com
+TZ=Asia/Ho_Chi_Minh
 ```
 
-**File `docker-compose.yml`:**
-```sudo nano docker-compose.yml```
+**File** `docker-compose.yml`**:**
 
 ```yaml
+version: "3.7"
+
 services:
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n
     ports:
       - "5678:5678"
-    volumes:
-      - ./n8n-data:/home/node/.n8n
-    restart: always
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE
+      - N8N_BASIC_AUTH_USER
+      - N8N_BASIC_AUTH_PASSWORD
+      - WEBHOOK_URL
+      - TZ
     env_file:
       - .env
+    volumes:
+      - ./n8n_data:/home/node/.n8n
 ```
+
+Chạy n8n:
 
 ```bash
 docker compose up -d
@@ -129,6 +175,7 @@ docker compose up -d
 ## 5. Trỏ domain `n8n.caothedo.com`
 
 ### Nếu dùng nội mạng:
+
 Sửa file `hosts` trên máy chính:
 
 ```txt
@@ -136,6 +183,7 @@ Sửa file `hosts` trên máy chính:
 ```
 
 ### Nếu dùng domain thật:
+
 Tạo bản ghi `A` trỏ `n8n` → IP public máy chủ
 
 ---
@@ -146,7 +194,7 @@ Tạo bản ghi `A` trỏ `n8n` → IP public máy chủ
 sudo apt install nginx
 ```
 
-**File cấu hình nginx: `/etc/nginx/sites-available/n8n`**
+**File cấu hình nginx:** `/etc/nginx/sites-available/n8n`
 
 ```nginx
 server {
