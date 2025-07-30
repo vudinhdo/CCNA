@@ -107,10 +107,16 @@ newgrp docker
 
 ### Cài đặt Docker Compose
 
-Tải phiên bản mới nhất của Docker Compose (thay `<version>` bằng phiên bản mới nhất, ví dụ: `2.24.5`):
+Tải phiên bản cụ thể của Docker Compose (ví dụ: 2.24.5):
 
 ```bash
-sudo curl -L "https://github.com/docker/compose/releases/download/v<version>/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+```
+
+Kiểm tra file vừa tải:
+
+```bash
+ls -l /usr/local/bin/docker-compose
 ```
 
 Cấp quyền thực thi:
@@ -123,6 +129,20 @@ Kiểm tra phiên bản Docker Compose:
 
 ```bash
 docker-compose --version
+```
+
+Nếu lệnh trên vẫn báo lỗi, kiểm tra file `docker-compose`:
+
+```bash
+file /usr/local/bin/docker-compose
+```
+
+File nên hiển thị là một executable. Nếu file rỗng hoặc lỗi, xóa và tải lại:
+
+```bash
+sudo rm /usr/local/bin/docker-compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 ```
 
 ### Tạo thư mục và file Cấu hình
@@ -237,4 +257,5 @@ Mở trình duyệt: https://n8n.caothedo.com
 - `docker ps`: Kiểm tra container đang chạy
 - `sudo systemctl status nginx`: Trạng thái NGINX
 - `sudo lsof -i :5678`: Kiểm tra port n8n
-- `ping n8n.caothedo.com`: Kiểm tra DNS
+
+# `ping n8n.caothedo.com`: Kiểm tra DNS
