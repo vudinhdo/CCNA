@@ -126,7 +126,10 @@ Tạo bản ghi `A` trỏ `n8n` → IP public máy chủ
 sudo apt install nginx
 ```
 
-**File cấu hình nginx: `/etc/nginx/sites-available/n8n`**
+**File cấu hình nginx:**
+```
+sudo nano /etc/nginx/sites-available/n8n  
+```
 
 ```nginx
 server {
