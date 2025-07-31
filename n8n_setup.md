@@ -137,7 +137,8 @@ sudo systemctl enable nginx
 sudo nano /etc/nginx/sites-available/n8n
 ```
 **Dán nội dung sau**:
-```nginxserver {
+```
+server {
     listen 80;
     server_name n8n.ctd.com;
 
