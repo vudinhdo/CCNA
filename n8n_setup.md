@@ -1,140 +1,145 @@
-# Cài đặt Máy chủ Ảo Ubuntu chạy n8n
+# Hướng Dẫn Cài Đặt n8n với Docker trên Ubuntu
 
-## 1. Cài đặt n8n bằng Docker
+Hướng dẫn chi tiết từng bước để cài đặt và chạy n8n trên máy chủ ảo Ubuntu sử dụng Docker, với IP tĩnh là `192.168.1.11` và tên miền `n8n.ctd.com`. Giả định bạn đã cài đặt Hyper-V và máy ảo Ubuntu (phiên bản 20.04 hoặc 22.04) với quyền root hoặc sudo.
 
-### Cài đặt Docker
-Cập nhật hệ thống và cài các gói hỗ trợ:
+## Yêu cầu
+- Máy ảo Ubuntu với IP tĩnh `192.168.1.11`.
+- Quyền truy cập root hoặc sudo.
+- Tên miền `n8n.ctd.com` đã được trỏ về IP `192.168.1.11` (thông qua DNS hoặc file `/etc/hosts` nếu thử nghiệm cục bộ).
+- Kết nối Internet để tải Docker và image n8n.
+
+## Các bước thực hiện
+
+### Bước 1: Cập nhật hệ thống và cài đặt Docker
+1. **Đăng nhập vào máy ảo Ubuntu**:
+   ```bash
+   ssh username@192.168.1.11
+   ```
+Thay username bằng tài khoản của bạn.
+
+2. **Cập nhật hệ thống**:
 ```bash
-sudo apt update
-sudo apt install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
+sudo apt update && sudo apt upgrade -y
 ```
-
-Thêm khóa GPG chính thức của Docker:
+3. **Cài đặt Docker**:
 ```bash
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+sudo apt install -y docker.io
 ```
-
-Thêm repository Docker:
+4. **Khởi động và kích hoạt Docker**:
 ```bash
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo systemctl start docker
+sudo systemctl enable docker
 ```
-
-Cập nhật lại danh sách gói và cài đặt Docker:
+5. **Cài đặt Docker Compose (n8n yêu cầu Docker Compose để quản lý container)**:
 ```bash
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io
+sudo apt install -y docker-compose
 ```
-
-Kiểm tra phiên bản Docker:
+6. **Kiểm tra phiên bản Docker và Docker Compose**:
 ```bash
-sudo docker --version
-```
-
-Cho phép người dùng hiện tại chạy Docker mà không cần `sudo`:
-```bash
-sudo usermod -aG docker $USER
-newgrp docker
-```
-
-### Cài đặt Docker Compose
-Tải phiên bản cụ thể của Docker Compose (ví dụ: 2.24.5):
-```bash
-sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-```
-
-Kiểm tra file vừa tải:
-```bash
-ls -l /usr/local/bin/docker-compose
-```
-
-Cấp quyền thực thi:
-```bash
-sudo chmod +x /usr/local/bin/docker-compose
-```
-
-Kiểm tra phiên bản Docker Compose:
-```bash
+docker --version
 docker-compose --version
 ```
 
-### Tạo thư mục và file Cấu hình
+### Bước 2: Cấu hình DNS hoặc file hosts
+Để truy cập n8n qua tên miền `n8n.ctd.com`, bạn cần đảm bảo tên miền trỏ đúng về IP `192.168.1.11`.
+
+Nếu bạn có quyền quản lý DNS:
+
+Vào giao diện quản lý DNS của nhà cung cấp tên miền (ví dụ: GoDaddy, Namecheap).
+```Thêm bản ghi A:
+textTên: n8n
+Loại: A
+Giá trị: 192.168.1.11
+TTL: 3600 (hoặc mặc định)
+```
+Chờ DNS cập nhật (thường mất vài phút đến vài giờ).
+
+
+Nếu thử nghiệm cục bộ (trên máy tính hoặc máy chủ):
+
+**Chỉnh sửa file /etc/hosts trên máy tính hoặc máy chủ**:
 ```bash
-mkdir n8n && cd n8n
-nano .env
+sudo nano /etc/hosts
+```
+Thêm dòng:
+```bash
+text192.168.1.11 n8n.ctd.com
 ```
 
-**File `.env`:**
+Lưu và thoát (Ctrl+O, Enter, Ctrl+X).
 
-```env
-N8N_BASIC_AUTH_ACTIVE=true
-N8N_BASIC_AUTH_USER=admin
-N8N_BASIC_AUTH_PASSWORD=your_password
-WEBHOOK_URL=https://n8n.caothedo.com
-TZ=Asia/Ho_Chi_Minh
+**Kiểm tra DNS**:
+```bash
+ping n8n.ctd.com
 ```
-### Cấu hình file yml  
+Nếu phản hồi từ 192.168.1.11, DNS đã được cấu hình đúng.
+
+### Bước 3: Tạo cấu hình Docker Compose cho n8n
+
+
+**Tạo thư mục cho n8n**:
+```bash
+mkdir ~/n8n && cd ~/n8n
+```
+
+**Tạo file docker-compose.yml**:
 ```bash
 nano docker-compose.yml
 ```
-**File `docker-compose.yml`:**
 
-```yaml
-version: "3.7"
-
+**Dán nội dung sau vào file**:
+```yamlversion: "3.8"
 services:
   n8n:
-    image: n8nio/n8n
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: always
     ports:
       - "5678:5678"
     environment:
-      - N8N_BASIC_AUTH_ACTIVE
-      - N8N_BASIC_AUTH_USER
-      - N8N_BASIC_AUTH_PASSWORD
-      - WEBHOOK_URL
-      - TZ
-    env_file:
-      - .env
+      - N8N_HOST=n8n.ctd.com
+      - N8N_PROTOCOL=http
+      - N8N_PORT=5678
+      - WEBHOOK_URL=http://n8n.ctd.com/
+      - N8N_SECURE_COOKIE=false
     volumes:
-      - ./n8n_data:/home/node/.n8n
+      - n8n_data:/home/node/.n8n
+volumes:
+  n8n_data:
 ```
+**Giải thích**:
+`
+image: Sử dụng image n8n chính thức.
+ports: Ánh xạ cổng 5678 (mặc định của n8n) từ container ra host.
+environment: Cấu hình tên miền và giao thức HTTP (vì bỏ SSL).
+volumes: Lưu trữ dữ liệu n8n để không bị mất khi container khởi động lại.
+`
 
-Chạy n8n:
+
+Lưu và thoát (Ctrl+O, Enter, Ctrl+X).
+
+
+### Bước 4: Cài đặt Nginx làm Reverse Proxy
+Để sử dụng tên miền n8n.ctd.com, bạn cần cài đặt Nginx làm reverse proxy.
+
+**Cài đặt Nginx**:
 ```bash
-docker compose up -d
+sudo apt install -y nginx
 ```
 
----
-
-## 2. Trỏ domain `n8n.caothedo.com`
-
-### Nếu dùng nội mạng:
-Sửa file `hosts` trên máy chính:
-
-```txt
-C:\Windows\System32\drivers\etc  
-192.168.1.100   n8n.caothedo.com
-```
-
-### Nếu dùng domain thật:
-Tạo bản ghi `A` trỏ `n8n` → IP public máy chủ
-
----
-
-## 3. Cài NGINX + SSL
-
+**Khởi động và kích hoạt Nginx**:
 ```bash
-sudo apt install nginx
+sudo systemctl start nginx
+sudo systemctl enable nginx
 ```
-
-**File cấu hình nginx:**
+**Tạo file cấu hình Nginx cho n8n**:
+```bash
+sudo nano /etc/nginx/sites-available/n8n
 ```
-sudo nano /etc/nginx/sites-available/n8n  
-```
-
-```nginx
-server {
+**Dán nội dung sau**:
+```nginxserver {
     listen 80;
-    server_name n8n.caothedo.com;
+    server_name n8n.ctd.com;
 
     location / {
         proxy_pass http://localhost:5678;
@@ -145,31 +150,86 @@ server {
     }
 }
 ```
-
+**Kích hoạt cấu hình**:
 ```bash
 sudo ln -s /etc/nginx/sites-available/n8n /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
 ```
-
-### Cài SSL Let's Encrypt
-
+**Kiểm tra cấu hình Nginx**:
 ```bash
-sudo apt install certbot python3-certbot-nginx
-sudo certbot --nginx -d n8n.caothedo.com
+sudo nginx -t
+```
+**Khởi động lại Nginx**:
+```bash
+sudo systemctl reload nginx
 ```
 
----
+### Bước 5: Khởi chạy n8n
 
-## 4. Truy cập thử
+**Chạy Docker Compose**:
+```bash
+cd ~/n8n
+sudo docker-compose up -d
+```
+**Kiểm tra trạng thái container**:
+```bash
+docker ps
+```
+Bạn sẽ thấy container n8n đang chạy.
+**Kiểm tra log**:
+```bash
+docker logs n8n
+```
 
-Mở trình duyệt: https://n8n.caothedo.com
+### Bước 6: Truy cập n8n
 
----
+**Mở trình duyệt và truy cập**:
+```text
+http://n8n.ctd.com
+```
+Đăng ký tài khoản n8n (lần đầu truy cập sẽ yêu cầu tạo tài khoản admin).
 
-## 5. Gợi ý kiểm tra lỗi
+### Bước 7: Cấu hình tường lửa (nếu cần)
+Nếu bạn bật UFW (Uncomplicated Firewall):
 
-- `docker ps`: Kiểm tra container đang chạy
-- `sudo systemctl status nginx`: Trạng thái NGINX
-- `sudo lsof -i :5678`: Kiểm tra port n8n
-- `ping n8n.caothedo.com`: Kiểm tra DNS
+**Cho phép các cổng cần thiết**:
+```bash
+sudo ufw allow 80
+sudo ufw allow ssh
+```
+**Kích hoạt UFW**:
+```bash
+sudo ufw enable
+```
+
+### Bước 8: Bảo trì và quản lý
+
+**Dừng n8n**:
+```bash
+cd ~/n8n
+sudo docker-compose down
+```
+**Cập nhật n8n**:
+```bash
+cd ~/n8n
+sudo docker-compose pull
+sudo docker-compose up -d
+```
+**Sao lưu dữ liệu**:
+Dữ liệu n8n được lưu trong volume n8n_data. Sao lưu thư mục:
+```bash
+sudo tar -czvf n8n_backup.tar.gz ~/.n8n
+```
+
+### Khắc phục sự cố
+
+Không truy cập được `n8n.ctd.com`:
+
+Kiểm tra DNS bằng `ping n8n.ctd.com`.
+Kiểm tra trạng thái Nginx: `sudo systemctl status nginx`.
+Kiểm tra log Docker: `docker logs n8n`.
+
+
+Cổng 5678 không hoạt động:
+
+Kiểm tra container: docker ps.
+Đảm bảo cổng 5678 không bị chặn: sudo netstat -tuln | grep 5678.
