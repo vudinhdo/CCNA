@@ -63,7 +63,7 @@ sudo nano /etc/hosts
 ```
 Thêm dòng:
 ```bash
-text192.168.1.11 n8n.ctd.com
+text 192.168.1.11 n8n.ctd.com
 ```
 
 Lưu và thoát (Ctrl+O, Enter, Ctrl+X).
