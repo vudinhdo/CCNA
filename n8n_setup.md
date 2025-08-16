@@ -12,9 +12,9 @@ Hướng dẫn chi tiết từng bước để cài đặt và chạy n8n trên 
 
 ### Bước 1: Cập nhật hệ thống và cài đặt Docker
 1. **Đăng nhập vào máy ảo Ubuntu**:
-   ```bash
-   ssh username@192.168.1.11
-   ```
+```bash
+ssh username@192.168.1.11
+```
 Thay username bằng tài khoản của bạn.
 
 2. **Cập nhật hệ thống**:
@@ -63,7 +63,7 @@ sudo nano /etc/hosts
 ```
 Thêm dòng:
 ```bash
-text 192.168.1.11 n8n.ctd.com
+192.168.1.11 n8n.ctd.com
 ```
 
 Lưu và thoát (Ctrl+O, Enter, Ctrl+X).
