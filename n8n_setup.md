@@ -124,6 +124,7 @@ Lưu và thoát (Ctrl+O, Enter, Ctrl+X).
 
 **Cài đặt Nginx**:
 ```bash
+cd ..
 sudo apt install -y nginx
 ```
 
